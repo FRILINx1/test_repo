@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>page2</title>
+</head>
+<body>
+  <h1>Реєстрація</h1>
+
+  <form id="user-form">
+    <input type="text" name="name" placeholder="Ім’я" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <button type="submit">Додати</button>
+  </form>
+
+  <h2>користувачі</h2>
+  <table border="1" id="users-table">
+    <thead>
+      <tr><th>ID</th><th>Ім’я</th><th>Email</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function loadUsers() {
+      const response = await fetch("/api/users");
+      const users = await response.json();
+      const tbody = document.querySelector("#users-table tbody");
+      tbody.innerHTML = ""; // очистити перед оновленням
+
+      users.forEach(user => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${user.id}</td><td>${user.name}</td><td>${user.email}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    document.getElementById("user-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      await fetch("/api/add_user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      e.target.reset();
+      loadUsers(); // оновити список
+    });
+
+    loadUsers();
+  </script>
+</body>
+</html>
